@@ -1,269 +1,167 @@
-# 🧱 Onchain LEGO
+# Onchain LEGO
 
-> Watch the Solana blockchain come to life through LEGO.
+Onchain LEGO is an interactive 3D visualization of Solana blockchain activity using familiar LEGO metaphors. Watch wallets as houses, transactions as cars, smart contracts as factories, and token transfers as packages—all animated in a real-time 3D environment.
 
-Interactive LEGO-style world that visualizes real blockchain activity on Solana in real-time. See wallets as houses, transactions as cars, smart contracts as factories, and token transfers as packages—all animated in a beautiful 3D environment.
+## Features
 
-## ✨ Features
+- Real-time 3D visualization of Solana blockchain activity
+- LEGO-based metaphors: houses for wallets, cars for transactions, factories for smart contracts
+- Interactive object selection with detailed blockchain data display
+- Playback controls (pause, speed adjustment, filtering)
+- WebSocket-based real-time updates with polling fallback for serverless deployments
+- Serverless API routes optimized for Vercel deployment
+- Full TypeScript implementation with comprehensive documentation
 
-- **🏗️ Real-time 3D Visualization** - Watch Solana transactions animate in 3D
-- **🏠 Blockchain Metaphors** - Wallets, transactions, contracts, and tokens represented as LEGO objects
-- **⚡ Live Updates** - WebSocket-powered real-time blockchain monitoring
-- **🎮 Interactive** - Click objects to see detailed blockchain data
-- **🎛️ Playback Controls** - Pause, rewind, adjust speed
-- **📊 Data Panels** - View transaction details, wallet info, contract interactions
-- **🌐 Solana Integration** - Powered by QuickNode for reliable blockchain data
+## Project Structure
 
-## 🎯 Concept
+```
+onchain-lego/
+├── api/                     # Serverless API routes for Vercel
+│   ├── health.ts
+│   ├── slot.ts
+│   ├── block.ts
+│   ├── transaction.ts
+│   ├── wallet/[address].ts
+│   ├── wallet/[address]/transactions.ts
+│   ├── blocks.ts
+│   └── ws-info.ts
+├── backend/                 # Node.js Express server
+│   ├── src/
+│   │   ├── services/        # QuickNode, SolanaBridge, TransactionParser, WSManager
+│   │   ├── types/           # TypeScript interfaces
+│   │   └── server.ts        # Express server setup
+│   └── package.json
+├── frontend/                # React + Three.js application
+│   ├── src/
+│   │   ├── components/      # LegoWorld, ObjectDetails, Controls
+│   │   ├── engine/          # Three.js renderer and LEGO objects
+│   │   ├── hooks/           # useBlockchainData, useLegoWorld
+│   │   └── styles/          # CSS styling
+│   └── package.json
+├── vercel.json              # Vercel configuration
+└── README.md                # This file
+```
 
-Blockchain activity represented as familiar LEGO objects:
-
-| Blockchain Component | LEGO Representation |
-|---|---|
-| **Wallets** | 🏠 LEGO Houses (red, pulsing) |
-| **Transactions** | 🚗 LEGO Cars (teal, moving) |
-| **Smart Contracts** | 🏭 LEGO Factories (yellow, animated) |
-| **Token Transfers** | 📦 LEGO Packages (green, floating) |
-| **Network Activity** | 🌍 Continuous movement & change |
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- **Node.js** 18.0+
-- **npm** 9.0+
-- **QuickNode Account** (free at https://quicknode.com)
+
+- Node.js 18+
+- npm or yarn
+- QuickNode account (optional, for live blockchain data)
 
 ### Installation
 
 ```bash
-# Clone and navigate
-cd on-chain-lego
-
-# Install dependencies
+# Install backend dependencies
 cd backend && npm install
+
+# Install frontend dependencies
 cd ../frontend && npm install
 ```
 
-### Setup Environment
+### Environment Configuration
 
-Create `.env` in project root:
+Create `.env` in the project root:
 
 ```env
-# Get these from https://quicknode.com
-QUICKNODE_RPC_URL=https://your-endpoint.solana-mainnet.quiknode.pro/
-QUICKNODE_WS_URL=wss://your-endpoint.solana-mainnet.quiknode.pro/
-
+QUICKNODE_RPC_URL=https://your-quicknode.solana-mainnet.quiknode.pro/
+QUICKNODE_WS_URL=wss://your-quicknode.solana-mainnet.quiknode.pro/
 BACKEND_PORT=3001
 FRONTEND_PORT=3000
 NODE_ENV=development
 ```
 
-### Run
+### Running Locally
 
-**Terminal 1 - Backend:**
 ```bash
-cd backend
-npm run dev
+# Terminal 1: Start backend server
+cd backend && npm run dev
+
+# Terminal 2: Start frontend development server
+cd frontend && npm run dev
 ```
 
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
-npm run dev
-```
+Access the application at http://localhost:3000
 
-Visit `http://localhost:3000` 🎉
+## Deployment
 
-## 📚 Documentation
+### Vercel (Recommended)
 
-- **[DEVELOPMENT.md](./DEVELOPMENT.md)** - Detailed setup, scripts, and development guide
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System design, data flow, and technical details
+1. Push the repository to GitHub
+2. Import the project in Vercel dashboard
+3. Configure environment variables (optional)
+4. Deploy
 
-## 🏗️ Project Structure
+Detailed deployment instructions available in [DEPLOYMENT.md](DEPLOYMENT.md)
 
-```
-on-chain-lego/
-├── backend/                          # Node.js + Express server
-│   ├── src/
-│   │   ├── services/
-│   │   │   ├── quicknode.ts          # Solana RPC connection
-│   │   │   ├── solanaBridge.ts       # Data normalization
-│   │   │   ├── transactionParser.ts  # Insights extraction
-│   │   │   └── wsManager.ts          # WebSocket broadcast
-│   │   ├── types/
-│   │   │   └── blockchain.ts         # Shared types
-│   │   └── server.ts
-│   ├── dist/
-│   └── package.json
-│
-├── frontend/                         # React + Three.js client
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── LegoWorld.tsx         # Main 3D canvas
-│   │   │   ├── ObjectDetails.tsx     # Data panel
-│   │   │   └── Controls.tsx          # Playback controls
-│   │   ├── engine/
-│   │   │   ├── renderer.ts           # Three.js setup
-│   │   │   ├── animations.ts         # Animation system
-│   │   │   └── objects/
-│   │   │       ├── LegoHouse.ts      # Wallet objects
-│   │   │       ├── LegoCar.ts        # Transaction objects
-│   │   │       ├── LegoFactory.ts    # Contract objects
-│   │   │       ├── LegoPackage.ts    # Transfer objects
-│   │   │       └── LegoObject.ts     # Base class
-│   │   ├── hooks/
-│   │   │   ├── useBlockchainData.ts  # WebSocket hook
-│   │   │   └── useLegoWorld.ts       # State management
-│   │   ├── styles/
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   ├── index.html
-│   └── package.json
-│
-├── .env                              # Configuration (create this)
-├── .gitignore
-├── DEVELOPMENT.md                    # Development guide
-├── ARCHITECTURE.md                   # Technical architecture
-└── README.md                         # This file
-```
+### Other Platforms
 
-## 🎮 How to Use
+The application can be deployed to any platform supporting:
+- Node.js for backend (Express)
+- Static site hosting for frontend (React build)
+- Serverless functions for API routes
 
-1. **View the World** - 3D LEGO world shows real-time blockchain activity
-2. **Click Objects** - Select any LEGO object to see detailed data
-3. **Control Playback** - Use controls panel to pause, adjust speed
-4. **Filter Events** - Focus on specific types of blockchain activity
-5. **Explore Data** - Expand sections in object details to see transaction info
+## Architecture
 
-## 🔌 API Endpoints
+The application follows a clean separation of concerns:
 
-### REST API
+- **Backend**: Node.js with Express, QuickNode SDK, WebSocket server
+- **Frontend**: React with TypeScript, Three.js for 3D rendering
+- **API**: REST endpoints for blockchain data, WebSocket for real-time events
+- **Deployment**: Vercel serverless functions with polling fallback
 
-```
-GET  /health                          # Server status
-GET  /api/slot                        # Current slot
-GET  /api/block/:slot                 # Block details
-GET  /api/transaction/:signature      # Transaction details
-GET  /api/wallet/:address             # Wallet information
-GET  /api/wallet/:address/transactions # Wallet history
-GET  /api/blocks?limit=10             # Recent blocks
-GET  /api/ws-info                     # WebSocket status
-```
+For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)
+
+## API Reference
+
+### REST Endpoints
+
+- `GET /api/health` - Health check
+- `GET /api/slot` - Current blockchain slot
+- `GET /api/block/:slot` - Block details
+- `GET /api/transaction/:signature` - Transaction details
+- `GET /api/wallet/:address` - Wallet information
+- `GET /api/wallet/:address/transactions` - Wallet transaction history
+- `GET /api/blocks` - Recent blocks
 
 ### WebSocket Events
 
-Connection: `ws://localhost:4001`
-
-Events:
-- `transaction` - New transaction
-- `block` - New block
+- `transaction` - New transaction detected
+- `block` - New block produced
 - `wallet_update` - Wallet state change
-- `contract_interaction` - Program execution
+- `contract_interaction` - Smart contract execution
 
-## 🛠️ Available Commands
+## Development
 
-### Backend
+For detailed development guide, see [DEVELOPMENT.md](DEVELOPMENT.md)
+
+Key development commands:
+
 ```bash
-npm run dev       # Start with hot reload
-npm run build     # Compile TypeScript
-npm run start     # Run compiled server
-npm run lint      # Lint code
-npm run typecheck # Check types
+# Backend
+cd backend && npm run dev       # Start development server
+cd backend && npm run build     # Compile TypeScript
+cd backend && npm run lint      # Run ESLint
+
+# Frontend
+cd frontend && npm run dev      # Start development server
+cd frontend && npm run build    # Build for production
+cd frontend && npm run preview  # Preview production build
 ```
 
-### Frontend
-```bash
-npm run dev       # Start dev server
-npm run build     # Build for production
-npm run preview   # Preview build
-npm run lint      # Lint code
-npm run typecheck # Check types
-```
+## Contributing
 
-## 💡 Examples
+Contributions are welcome. Please feel free to submit a Pull Request.
 
-### Adding a New LEGO Object Type
+## License
 
-```typescript
-// frontend/src/engine/objects/LegoValidator.ts
-import { LegoObject } from './LegoObject';
+MIT License
 
-export class LegoValidator extends LegoObject {
-  constructor(data: LegoObjectData) {
-    super(data);
-    this.baseColor = new THREE.Color(0xff8b94);
-    this.create();
-  }
+## Resources
 
-  create(): void {
-    // Build 3D geometry
-  }
-
-  update(time: number): void {
-    // Animation logic
-  }
-}
-```
-
-### Subscribing to Events
-
-```typescript
-const { eventQueue } = useBlockchainData({
-  onTransaction: (tx) => {
-    console.log('New transaction:', tx);
-    // Create animation
-  },
-  onBlock: (block) => {
-    console.log('New block:', block);
-  }
-});
-```
-
-## 🎨 Customization
-
-### Colors
-LEGO object colors are defined in their constructors:
-- LegoHouse: `0xff6b6b` (red)
-- LegoCar: `0x4ecdc4` (teal)
-- LegoFactory: `0xffd93d` (yellow)
-- LegoPackage: `0xa8e6cf` (green)
-
-### Animations
-Modify animation speed and easing in `frontend/src/engine/animations.ts`
-
-### Theme
-Update color scheme in `frontend/src/styles/App.css`
-
-## 🚦 Next Steps
-
-- [ ] Connect to production Solana RPC
-- [ ] Add more LEGO object types (validators, NFTs)
-- [ ] Implement transaction replay mode
-- [ ] Add statistics dashboard
-- [ ] Enable collaborative viewing
-- [ ] Deploy to production
-
-## 📖 Learning Resources
-
-- [Solana Docs](https://docs.solana.com)
-- [QuickNode Docs](https://www.quicknode.com/docs)
-- [Three.js Docs](https://threejs.org/docs)
-- [React Docs](https://react.dev)
-
-## 🤝 Contributing
-
-Contributions welcome! Please feel free to submit PRs or open issues.
-
-## 📄 License
-
-MIT - See LICENSE file for details
-
-## 🙋 Support
-
-- 📖 Check [DEVELOPMENT.md](./DEVELOPMENT.md) for setup help
-- 🏗️ Review [ARCHITECTURE.md](./ARCHITECTURE.md) for design details
-- 💬 Open an issue for bugs or feature requests
-
----
-
-**Made with 🧱 and ⚡ for blockchain visualization**
+- [Solana Documentation](https://docs.solana.com)
+- [QuickNode Documentation](https://www.quicknode.com/docs)
+- [Three.js Documentation](https://threejs.org/docs)
+- [React Documentation](https://react.dev)
+- [Vercel Documentation](https://vercel.com/docs)
