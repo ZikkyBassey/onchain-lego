@@ -26,13 +26,13 @@ if (process.env.QUICKNODE_RPC_URL && process.env.QUICKNODE_WS_URL) {
       process.env.QUICKNODE_RPC_URL,
       process.env.QUICKNODE_WS_URL
     );
+    console.log('QuickNode connection configured for live Solana data');
   } catch (error) {
-    console.warn('⚠️  QuickNode service initialization failed:', error);
-    console.warn('ℹ️  Running in demo mode without live blockchain data');
+    console.error('Failed to initialize QuickNode:', error);
   }
 } else {
-  console.log('ℹ️  No QuickNode credentials provided - running in demo mode');
-  console.log('ℹ️  To enable live blockchain data, set QUICKNODE_RPC_URL and QUICKNODE_WS_URL in .env');
+  console.log('No QUICKNODE_RPC_URL found - running in demo mode');
+  console.log('To enable live blockchain data, add credentials to .env file');
 }
 
 const solanaBridge = new SolanaBridgeService();
@@ -191,34 +191,53 @@ wsManager.onClientMessage((data, ws) => {
 });
 
 /**
- * Start monitoring blockchain for events
+ * Start monitoring blockchain for live transactions
  */
 async function startBlockchainMonitoring() {
   if (!quicknode) {
-    console.log('ℹ️  Blockchain monitoring skipped (not connected)');
+    console.log('No QuickNode connection - running in demo mode');
     return;
   }
 
-  console.log('Starting blockchain monitoring...');
+  console.log('Starting real-time blockchain monitoring...');
 
-  // Monitor slot changes
-  if (quicknode.isConnected()) {
-    quicknode.onSlotUpdate((slot: number) => {
-      console.log(`New slot: ${slot}`);
+  // Subscribe to blocks
+  quicknode.onBlock((slot: number, transactionCount: number) => {
+    const block = {
+      slot,
+      blockTime: Math.floor(Date.now() / 1000),
+      transactionCount,
+      leader: `Validator ${slot % 100}`,
+    };
+    
+    console.log(`Block ${slot}: ${transactionCount} transactions`);
+    
+    // Broadcast to frontend
+    wsManager.broadcast({
+      type: 'block',
+      timestamp: Date.now(),
+      data: block,
+    });
+  });
 
+  // Subscribe to transactions
+  quicknode.onTransaction((signature: string, transaction: any) => {
+    const parsed = solanaBridge.normalizeTransaction(transaction, signature);
+    if (parsed) {
+      console.log(`Transaction: ${signature.slice(0, 8)}...`);
+      
       // Broadcast to frontend
       wsManager.broadcast({
-        type: 'block',
+        type: 'transaction',
         timestamp: Date.now(),
-        data: {
-          slot,
-          blockTime: Math.floor(Date.now() / 1000),
-          transactionCount: 0,
-          leader: `Validator ${slot % 100}`,
-        },
+        data: parsed,
       });
-    });
-  }
+    }
+  });
+
+  // Start the monitoring loop
+  quicknode.startMonitoring();
+  console.log('Live transaction monitoring active');
 }
 
 /**
@@ -243,15 +262,12 @@ app.use((req: Request, res: Response) => {
  * Start server
  */
 const server = app.listen(PORT, () => {
-  console.log(`
-╔═══════════════════════════════════════╗
-║   Onchain LEGO Backend Server         ║
-╚═══════════════════════════════════════╝
-
-🚀 Server running on http://localhost:${PORT}
-🔌 WebSocket server on ws://localhost:${WS_PORT}
-📊 Environment: ${process.env.NODE_ENV || 'development'}
-  `);
+  console.log(`Onchain LEGO Backend Server`);
+  console.log(`HTTP API: http://localhost:${PORT}`);
+  console.log(`WebSocket: ws://localhost:${WS_PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Timestamp: ${new Date().toISOString()}`);
+  console.log(``);
 
   startBlockchainMonitoring();
 });

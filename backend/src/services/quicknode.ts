@@ -1,18 +1,113 @@
 /**
- * QuickNode RPC and WebSocket connection management
+ * QuickNode RPC and WebSocket connection management for live Solana data
  */
 
-import { Connection, PublicKey, ConfirmedSignatureInfo } from '@solana/web3.js';
+import { Connection, PublicKey, ParsedTransactionWithMeta } from '@solana/web3.js';
+
+export type TransactionCallback = (signature: string, transaction: ParsedTransactionWithMeta) => void;
+export type BlockCallback = (slot: number, transactionCount: number) => void;
 
 export class QuickNodeService {
   private connection: Connection;
   private wsUrl: string;
   private rpcUrl: string;
+  private lastProcessedSlot: number = 0;
+  private transactionCallbacks: TransactionCallback[] = [];
+  private blockCallbacks: BlockCallback[] = [];
+  private isMonitoring: boolean = false;
+  private monitorInterval: NodeJS.Timeout | null = null;
 
   constructor(rpcUrl: string, wsUrl: string) {
     this.rpcUrl = rpcUrl;
     this.wsUrl = wsUrl;
     this.connection = new Connection(rpcUrl, 'confirmed');
+    console.log('QuickNode service initialized for', rpcUrl);
+  }
+
+  /**
+   * Start monitoring for new blocks and transactions
+   * This is the key method that enables live transaction streaming
+   */
+  startMonitoring(): void {
+    if (this.isMonitoring) return;
+    
+    this.isMonitoring = true;
+    console.log('Starting real-time transaction monitoring...');
+    
+    // Poll for new blocks every 400ms (Solana target block time)
+    this.monitorInterval = setInterval(async () => {
+      try {
+        const currentSlot = await this.connection.getSlot();
+        
+        // Only process new blocks
+        if (currentSlot > this.lastProcessedSlot) {
+          const block = await this.connection.getBlock(currentSlot, {
+            maxSupportedTransactionVersion: 0,
+          });
+          
+          if (block && block.transactions) {
+            // Notify block callbacks
+            this.blockCallbacks.forEach(cb => cb(currentSlot, block.transactions.length));
+            
+            // Process all transactions in the block
+            for (const tx of block.transactions) {
+              if (tx.transaction.signature) {
+                // Fetch full transaction details
+                const fullTx = await this.connection.getParsedTransaction(
+                  tx.transaction.signature,
+                  { maxSupportedTransactionVersion: 0 }
+                );
+                
+                if (fullTx) {
+                  // Notify transaction callbacks
+                  this.transactionCallbacks.forEach(cb => 
+                    cb(tx.transaction.signature, fullTx)
+                  );
+                }
+              }
+            }
+            
+            this.lastProcessedSlot = currentSlot;
+          }
+        }
+      } catch (error) {
+        console.error('Error in monitoring loop:', error);
+      }
+    }, 400);
+  }
+
+  /**
+   * Stop monitoring
+   */
+  stopMonitoring(): void {
+    if (this.monitorInterval) {
+      clearInterval(this.monitorInterval);
+      this.monitorInterval = null;
+    }
+    this.isMonitoring = false;
+    console.log('Transaction monitoring stopped');
+  }
+
+  /**
+   * Subscribe to new transactions
+   */
+  onTransaction(callback: TransactionCallback): () => void {
+    this.transactionCallbacks.push(callback);
+    // Return unsubscribe function
+    return () => {
+      this.transactionCallbacks = this.transactionCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  /**
+   * Subscribe to new blocks
+   */
+  onBlock(callback: BlockCallback): () => void {
+    this.blockCallbacks.push(callback);
+    // Return unsubscribe function
+    return () => {
+      this.blockCallbacks = this.blockCallbacks.filter(cb => cb !== callback);
+    };
   }
 
   /**
@@ -121,28 +216,6 @@ export class QuickNodeService {
   }
 
   /**
-   * Subscribe to slot notifications
-   */
-  onSlotUpdate(callback: (slot: number) => void) {
-    return this.connection.onSlotChange((slotInfo) => {
-      callback(slotInfo.slot);
-    });
-  }
-
-  /**
-   * Subscribe to account changes
-   */
-  onAccountChange(address: string, callback: (account: any) => void) {
-    try {
-      const pubkey = new PublicKey(address);
-      return this.connection.onAccountChange(pubkey, callback);
-    } catch (error) {
-      console.error(`Error subscribing to account changes for ${address}:`, error);
-      return null;
-    }
-  }
-
-  /**
    * Get connection status
    */
   isConnected(): boolean {
@@ -153,7 +226,7 @@ export class QuickNodeService {
    * Close connections
    */
   close() {
-    // Connection is stateless, nothing to close
+    this.stopMonitoring();
   }
 }
 
