@@ -1,0 +1,262 @@
+.object-details {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 400px;
+  height: 100%;
+  background: rgba(20, 24, 40, 0.95);
+  border-left: 2px solid #667eea;
+  overflow-y: auto;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  z-index: 100;
+  transition: transform 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.object-details.closed {
+  transform: translateX(100%);
+  pointer-events: none;
+}
+
+.details-header {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+  z-index: 10;
+}
+
+.object-type {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  letter-spacing: 2px;
+}
+
+.object-type-house {
+  color: #ff6b6b;
+}
+
+.object-type-car {
+  color: #4ecdc4;
+}
+
+.object-type-factory {
+  color: #ffd93d;
+}
+
+.object-type-package {
+  color: #a8e6cf;
+}
+
+.object-type-station {
+  color: #ff8b94;
+}
+
+.details-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  word-break: break-all;
+  margin-bottom: 8px;
+}
+
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.details-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.details-section {
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.section-header {
+  width: 100%;
+  padding: 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border: none;
+  color: #667eea;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.section-header:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.section-header.expanded {
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.section-icon {
+  font-size: 14px;
+}
+
+.section-title {
+  flex: 1;
+  text-align: left;
+}
+
+.section-toggle {
+  font-size: 14px;
+}
+
+.section-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.data-row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  align-items: flex-start;
+}
+
+.data-label {
+  color: #667eea;
+  font-weight: bold;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.data-value {
+  color: #a8e6cf;
+  word-break: break-word;
+  flex: 1;
+}
+
+.data-value.status-success {
+  color: #51cf66;
+}
+
+.data-value.status-failed {
+  color: #ff6b6b;
+}
+
+.short-hash {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.subsection {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.subsection h4 {
+  margin: 0 0 8px 0;
+  color: #667eea;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.transfer-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.transfer-arrow {
+  color: #ffd93d;
+  font-weight: bold;
+}
+
+.transfer-from,
+.transfer-to {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transfer-from {
+  color: #ff6b6b;
+}
+
+.transfer-to {
+  color: #51cf66;
+}
+
+.transfer-amount {
+  color: #ffd93d;
+  font-weight: bold;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.raw-json {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 1.4;
+  max-height: 300px;
+  overflow-y: auto;
+  color: #a8e6cf;
+  margin: 0;
+}
+
+.details-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: rgba(160, 160, 160, 0.6);
+  font-size: 14px;
+  padding: 20px;
+}

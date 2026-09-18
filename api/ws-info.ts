@@ -1,0 +1,15 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default function handler(
+  request: VercelRequest,
+  response: VercelResponse
+) {
+  response.status(200).json({
+    wsPort: 4001,
+    clients: 0,
+    queueSize: 0,
+    note: 'WebSocket not available on Vercel. Use polling instead.',
+    pollingEnabled: true,
+    pollingInterval: 5000
+  });
+}
